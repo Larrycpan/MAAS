@@ -10,7 +10,8 @@ for (i in list.files("./function/", pattern=".cpp$")) {
   sourceCpp(paste0("./function/", i))
 }
 ```
-We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration. 
+We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
+To perform SNV RPCA analysis, you should install [Matlab](https://www.mathworks.com/products/matlab.html) in advance. This will finish in a few seconds.
 In addition, we highly recommend installing [openBLAS](https://github.com/OpenMathLib/OpenBLAS) to speed matrix operations, before starting your MAAS analysis.
 
 | :boom:| If you choose to install openBLAS, MAAS integration may take lots of memories of your system.|
