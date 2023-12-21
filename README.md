@@ -15,10 +15,10 @@ Documentation and tutorials (data preparation and integration) can be found at <
 
 ### Getting help
 
-If you encounter a bug or have a feature request, please open an [issue](https://github.com/Larrycpan/MAAS/issues).
+If you encounter a bug or have a feature request, please open an [Issues](https://github.com/Larrycpan/MAAS/issues).
 
 If you would like to discuss questions related to single-cell analysis,
-you can open a [discussion](https://github.com/Larrycpan/MAAS/discussions).
+you can open a [Discussions](https://github.com/Larrycpan/MAAS/discussions).
 
 ### Citation
 
