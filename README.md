@@ -10,7 +10,8 @@ for (i in list.files("./function/", pattern=".cpp$")) {
   sourceCpp(paste0("./function/", i))
 }
 ```
-We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
+We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration. 
+In addition, we highly recommend installing [openBLAS](https://github.com/OpenMathLib/OpenBLAS) to speed matrix operations, before starting your MAAS analysis.
 
 Documentation and tutorials (full data preparation and integration) can be found at <xxx>.
 
