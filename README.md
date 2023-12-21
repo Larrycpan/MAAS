@@ -4,7 +4,14 @@
 Model-based Analysis of scATAC-Seq (MAAS) is a method for idenfication of tumor subpopulations based on single-cell
 chromatin data. MAAS is easy to use, which includes peak adjusting and multimodal integration.
 
-Documentation and tutorials can be found at <xxx>.
+To use MAAS functions for integration, please source the Rcpp code.
+```
+for (i in list.files("./function/", pattern=".cpp$")) {
+  sourceCpp(paste0("./function/", i))
+}
+```
+
+Documentation and tutorials (data preparation and integration) can be found at <xxx>.
 
 ### Getting help
 
