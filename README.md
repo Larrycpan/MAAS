@@ -4,12 +4,18 @@
 Model-based Analysis of scATAC-Seq (MAAS) is a method for idenfication of tumor subpopulations based on single-cell
 chromatin data.
 
-To use MAAS functions for integration, please run the following code in __R__.
+To use MAAS functions for integration, please run the following commands in __R__.
 ```
 for (i in list.files("./function/", pattern=".cpp$")) {
   sourceCpp(paste0("./function/", i))
 }
 ```
+
+The key step of MAAS is integration, which is applied in a one-line-command
+```
+maas_res <- MAAS(peak.similarity, cnv.similarity, snv.similarity, dims = 2:5)
+```
+
 We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
 To perform SNV RPCA analysis, you should install [Matlab](https://www.mathworks.com/products/matlab.html) in advance, which always finishes in a few seconds. 
 This step is optional for users that raw SNV matrix is also adopted by MAAS.
