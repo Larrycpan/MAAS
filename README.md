@@ -14,5 +14,5 @@ If you would like to discuss questions related to single-cell analysis,
 you can open a [discussion](https://github.com/Larrycpan/MAAS/discussions).
 
 ### Related packages
-- [epiAneufinder]<https://github.com/colomemaria/epiAneufinder>
-- [ArchR]<https://www.archrproject.com/>
+-   [ArchR](https://www.archrproject.com/)
+-   [epiAneufinder](https://github.com/colomemaria/epiAneufinder)
