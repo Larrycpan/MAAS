@@ -12,7 +12,8 @@ for (i in list.files("./function/", pattern=".cpp$")) {
 ```
 We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration. 
 In addition, we highly recommend installing [openBLAS](https://github.com/OpenMathLib/OpenBLAS) to speed matrix operations, before starting your MAAS analysis.
-[!CAUTION] If you choose to install openBLAS, MAAS integration may take lots of memories of your system. 
+[!CAUTION] 
+If you choose to install openBLAS, MAAS integration may take lots of memories of your system. 
 
 Documentation and tutorials (full data preparation and integration) can be found at <xxx>.
 
