@@ -15,7 +15,7 @@ The key step of MAAS is integration, which is applied in a one-line-command
 ```
 maas_res <- MAAS(peak.similarity, cnv.similarity, snv.similarity, dims = 2:5)
 ```
-Documentation and tutorials (full data preparation and integration) can be found at <xxx>. The example data has been uploaded to [Zenodo](https://zenodo.org/) (doi: 10.5281/zenodo.10355916)
+Documentation and tutorials (full data preparation and integration) can be found at <http://bioinfo.szbl.ac.cn/share/MAAS_data/_site/index.html>. The example data has been uploaded to [Zenodo](https://zenodo.org/) (doi: 10.5281/zenodo.10355916)
 
 We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
 To perform SNV RPCA analysis, you should install [Matlab](https://www.mathworks.com/products/matlab.html) in advance, which always finishes in a few seconds. 
