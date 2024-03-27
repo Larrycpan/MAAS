@@ -338,23 +338,23 @@ class="section level3">
 <h3>Run <a
 href="https://gatk.broadinstitute.org/hc/en-us/articles/360037593851-Mutect2">Mutect2</a>
 in tumor-only mode for each normal cell</h3>
-<pre class="r"><code>bash normal.SNP.calling.sh</code></pre>
+<pre class="r"><code>bash SNV_normal.SNV.calling.sh</code></pre>
 <p>After running the snp calling shell script, we can see the header
 <code>##tumor_sample=CRC-3-11773</code> of each cell is the same, which
 can cause failure of vcf file merge. Thus, we provide a custom Python
 script to change the header name to the cell barcode
 (e.g. <code>##tumor_sample=TAAACCGAGGGAAGCG-1</code>).</p>
-<pre class="r"><code>python changeName.py</code></pre>
+<pre class="r"><code>python SNV_changeName.py</code></pre>
 </div>
 <div id="create-a-genomicsdb-from-the-normal-mutect2-calls."
 class="section level3">
 <h3>Create a GenomicsDB from the normal Mutect2 calls.</h3>
-<pre class="r"><code>bash mergeVCF.sh</code></pre>
+<pre class="r"><code>bash SNV_mergeVCF.sh</code></pre>
 </div>
 <div id="combine-the-normal-calls-using-createsomaticpanelofnormals"
 class="section level3">
 <h3>Combine the normal calls using CreateSomaticPanelOfNormals</h3>
-<pre class="r"><code>bash CreateNormalPanel.sh</code></pre>
+<pre class="r"><code>bash SNV_CreateNormalPanel.sh</code></pre>
 </div>
 
 

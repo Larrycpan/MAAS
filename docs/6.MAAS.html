@@ -321,8 +321,8 @@ rm(list = ls())
 library(dplyr)
 library(Rcpp)
 # Load MAAS Rcpp functions
-for (i in list.files(&quot;./function/&quot;, pattern=&quot;.cpp$&quot;)) {
-  sourceCpp(paste0(&quot;./function/&quot;, i))
+for (i in list.files(&quot;./src/&quot;, pattern=&quot;MAAS*&quot;)) {
+  sourceCpp(paste0(&quot;./src/&quot;, i))
 }</code></pre>
 <pre class="r"><code># Load data
 # Load peak profile

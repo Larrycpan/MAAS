@@ -336,9 +336,9 @@ export -f operation
 cat chunk_list.txt | xargs -I {} -P 0 bash -c &#39;operation &quot;{}&quot;&#39;</code></pre>
 <p>Then we call SNVs for tumor cells with the panel of normal (PON).</p>
 <pre class="r"><code># Mutation calling
-bash tumor.SNV.calling.sh
+bash SNV_tumor.SNV.calling.sh
 # Mutation filtering
-bash filter.sh</code></pre>
+bash SNV_filter.sh</code></pre>
 
 
 
