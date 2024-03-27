@@ -6,6 +6,7 @@ chromatin data.
 
 To use MAAS functions for integration, please run the following commands in __R__.
 ```
+library(Rcpp)
 for (i in list.files("./src/", pattern="MAAS*")) {
   sourceCpp(paste0("./src/", i))
 }
