@@ -23,8 +23,8 @@ This step is optional for users that raw SNV matrix is also adopted by MAAS.
 
 In addition, we highly recommend installing [openBLAS](https://github.com/OpenMathLib/OpenBLAS) to speed matrix operations, before starting your MAAS analysis.
 
-| :boom:| If you choose to install openBLAS, MAAS integration may take lots of memories of your system.|
-|---------------|:------------------------|
+#| :boom:| If you choose to install openBLAS, MAAS integration may take lots of memories of your system.|
+#|---------------|:------------------------|
 
 ### Getting help
 
