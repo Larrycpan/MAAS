@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html lang="en-US" xml:lang="en-US">
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>1.Peak calling</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MAAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span class="fa fa-atom"></span>
+     
+    Get started
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="1.Peak-calling.html">1.Peak calling</a>
+    </li>
+    <li>
+      <a href="2.CNV-calling.html">2.CNV calling</a>
+    </li>
+    <li class="dropdown-submenu">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">3.SNV calling</a>
+      <ul class="dropdown-menu" role="menu">
+        <li>
+          <a href="3.SNV-calling---a.-normal-panel.html">a.Normal panel</a>
+        </li>
+        <li>
+          <a href="3.SNV-calling---HaplotypeCaller.html">b.SNV panel</a>
+        </li>
+        <li>
+          <a href="3.SNV-calling---c.-Tumor-cell-SNV.html">c.Tumor cell SNV</a>
+        </li>
+        <li>
+          <a href="4.Generate-SNV-matrix.html">d.Generate SNV matrix</a>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <a href="5.SNV-RPCA.html">4.RPCA</a>
+    </li>
+    <li>
+      <a href="6.MAAS.html">5. Running MAAS</a>
+    </li>
+    <li>
+      <a href="7.Clustering.html">6.Clustering</a>
+    </li>
+    <li>
+      <a href="8.Functional-enrichment.html">7.Functional enrichment</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Contact.html">
+    <span class="fa fa-envelope"></span>
+     
+    Contact
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">1.Peak calling</h1>
+
+</div>
+
+
+<p>Here we use the R package <a
+href="https://www.archrproject.com/">ArchR</a> to processing scATAC-seq
+peak data and call peaks. The example data has been updated to
+Zenodo</p>
+<pre class="r"><code># Clear workspace and load libraries
+rm(list = ls())
+library(ArchR)
+library(dplyr)
+library(HGNChelper)</code></pre>
+<hr />
+<div id="create-an-arrow-file" class="section level3">
+<h3>Create an arrow file</h3>
+<p>First, we generate an arrow file for filtering low-quality cells and
+peaks.</p>
+<pre class="r"><code>addArchRThreads(threads = 40)
+addArchRGenome(&quot;hg38&quot;)
+inputFiles &lt;- c(&quot;./CRC-3-11773/raw_data/CRC-3-11773/outs/fragments.tsv.gz&quot;)
+names(inputFiles) &lt;- c(&quot;CRC&quot;)
+ArrowFiles &lt;- createArrowFiles(
+  inputFiles = inputFiles,
+  sampleNames = names(inputFiles),
+  minTSS = 3,
+  minFrags = 1000, 
+  addTileMat = T,
+  addGeneScoreMat = T
+)</code></pre>
+<hr />
+</div>
+<div id="create-archr-project" class="section level3">
+<h3>Create ArchR project</h3>
+<p>For downstream analysis, we create ArchR project to perform dimension
+reduction and clustering.</p>
+<pre class="r"><code>projHeme1 &lt;- ArchRProject(ArrowFiles = ArrowFiles, outputDirectory = &quot;CRC&quot;, copyArrows = F)
+# The parameters can be changed based on user&#39;s own data
+projHeme2 &lt;- addIterativeLSI(ArchRProj = projHeme1, useMatrix = &quot;TileMatrix&quot;, name = &quot;IterativeLSI&quot;,
+                             iterations = 2, clusterParams = list(resolution = c(0.2), 
+                                                                  sampleCells = 10000, 
+                                                                  n.start = 10
+                                                                  ), 
+                             varFeatures = 20000, 
+                             dimsToUse = 1:30
+                             )
+projHeme2 &lt;- addClusters(input = projHeme2, reducedDims = &quot;IterativeLSI&quot;, method = &quot;Seurat&quot;, 
+                         name = &quot;Clusters&quot;, resolution = 0.5, force = T)</code></pre>
+<hr />
+</div>
+<div id="peak-calling" class="section level3">
+<h3>Peak calling</h3>
+<p>As suggested, we use <a
+href="https://pypi.org/project/MACS2/">MACS2</a> for peak calling. Users
+should specify the their own path to MACS2. In the study, we set the
+window of each peak as 5000bp using the parameter
+<code>extendSummits = 2500</code>.</p>
+<pre class="r"><code>projHeme3 &lt;- addGroupCoverages(ArchRProj = projHeme2, groupBy = &quot;Clusters&quot;)
+projHeme3 &lt;- addReproduciblePeakSet(ArchRProj = projHeme3, groupBy = &quot;Clusters&quot;, 
+                                    pathToMacs2 = &quot;/usr/local/bin/macs2&quot;,
+                                    shift = -100,
+                                    extsize = 200,
+                                    extendSummits = 2500,
+                                    force = T)
+projHeme4 &lt;- addPeakMatrix(projHeme3, force = T)</code></pre>
+<hr />
+</div>
+<div id="manipulate-called-peaks" class="section level3">
+<h3>Manipulate called peaks</h3>
+<pre class="r"><code># Save the peak name formatted as &quot;chrXX:XXXXXX-XXXXXX&quot;
+peak.Matrix.obj &lt;- getMatrixFromProject(projHeme4, useMatrix = &quot;PeakMatrix&quot;)
+peak_ranges &lt;- rowRanges(peak.Matrix.obj)
+peak_names &lt;- paste0(seqnames(peak_ranges), &quot;:&quot;, start(peak_ranges), &quot;-&quot;, end(peak_ranges))
+
+# Get peak matrix, cell in columns and peaks in row
+peak.matrix &lt;- as.data.frame(assay(getMatrixFromProject(projHeme4, useMatrix = &quot;PeakMatrix&quot;)))
+rownames(peak.matrix) &lt;- peak_names
+saveRDS(peak.matrix, &quot;peak.matrix.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="cell-annotation-using-gene-activity-scores"
+class="section level3">
+<h3>Cell annotation using gene activity scores</h3>
+<p>Here we use <a
+href="https://github.com/IanevskiAleksandr/sc-type">scType</a> to
+automatically annotate cell types. This step can be used for multiple
+single-cell data analysis, such as cell-cell communications and
+pseudo-time trajectory reconstruction etc.</p>
+<pre class="r"><code># Obtain gene score matrix
+geneMatrix &lt;- getMatrixFromProject(projHeme4, useMatrix = &quot;GeneScoreMatrix&quot;)
+geneScoreMatrix &lt;- as.data.frame(geneMatrix@assays@data@listData[[&quot;GeneScoreMatrix&quot;]])
+rownames(geneScoreMatrix) &lt;- geneMatrix@elementMetadata@listData[[&quot;name&quot;]]
+saveRDS(geneScoreMatrix, &quot;geneScoreMatrix.rds&quot;)</code></pre>
+<pre class="r"><code># scType analysis
+# load gene set preparation function
+source(&quot;gene_sets_prepare.R&quot;)
+# load cell type annotation function
+source(&quot;sctype_score_.R&quot;)
+# DB file
+db_ = &quot;ScTypeDB_full.xlsx&quot;
+tissue = &quot;Intestine&quot; 
+
+# prepare gene sets
+gs_list &lt;- gene_sets_prepare(db_, tissue)
+
+# get cell-type by cell matrix
+es.max &lt;- sctype_score(scRNAseqData = as.matrix(geneScoreMatrix), scaled = TRUE, 
+                       gs = gs_list$gs_positive, gs2 = gs_list$gs_negative) 
+
+# merge by cluster
+cell.meta &lt;- as.data.frame(getCellColData(projHeme4, select = &quot;Clusters&quot;))
+cL_resutls &lt;- do.call(&quot;rbind&quot;, lapply(unique(cell.meta$Clusters), function(cl){
+  es.max.cl = sort(rowSums(es.max[ ,rownames(cell.meta[cell.meta$Clusters==cl,,drop=F])]), decreasing = !0)
+  head(data.frame(cluster = cl, type = names(es.max.cl), scores = es.max.cl, ncells = sum(cell.meta$Clusters==cl)), 10)
+}))
+sctype_scores = cL_resutls %&gt;% group_by(cluster) %&gt;% top_n(n = 1, wt = scores)  
+
+# set low-confident (low ScType score) clusters to &quot;unknown&quot;
+sctype_scores$type[as.numeric(as.character(sctype_scores$scores)) &lt; sctype_scores$ncells/4] = &quot;Unknown&quot;
+
+cell.meta$customclassif = &quot;&quot;
+for(j in unique(sctype_scores$cluster)){
+  cl_type = sctype_scores[sctype_scores$cluster==j,]; 
+  cell.meta$customclassif[cell.meta$Clusters == j] = as.character(cl_type$type[1])
+}
+projHeme5 &lt;- addCellColData(projHeme4, data = cell.meta$customclassif, cells = projHeme4$cellNames, name = &quot;Cell_type&quot;)
+
+p &lt;- plotEmbedding(ArchRProj = projHeme5, colorBy = &quot;cellColData&quot;, name = &quot;Cell_type&quot;, embedding = &quot;UMAP&quot;)
+plotPDF(p, name = &quot;Plot-UMAP-Cell-type.pdf&quot;, ArchRProj = projHeme5, addDOC = FALSE, width = 5, height = 5)</code></pre>
+<p><img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/Plot-UMAP-Cell-type.png" width="60%" height="50%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Save confident non-tumor cells
+normal.cell &lt;- rownames(cell.meta[cell.meta$customclassif != &quot;Intestinal epithelial cells&quot;,])
+normal.cell &lt;- data.frame(V1 = normal.cell, V2 = normal.cell)
+ # This file can be used for bam file split according to barcode names
+write.table(normal.cell, &quot;normal.cell.txt&quot;, sep = &#39;\t&#39;, quote = F, row.names = F)</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
