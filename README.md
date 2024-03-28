@@ -4,7 +4,7 @@ Model-based Analysis of scATAC-Seq (MAAS) is a method for idenfication of tumor 
 chromatin data.
 
 <p align="center">
-<img src="[https://github.com/favicon.ico](https://github.com/Larrycpan/MAAS/blob/main/docs/figure/Figure%201.png)" width="500", height = 600>
+<img src="https://github.com/Larrycpan/MAAS/blob/main/docs/figure/Figure%201.png" width="500", height = 600>
 <p align="center">
 
 To use MAAS functions for integration, please run the following commands in __R__.
