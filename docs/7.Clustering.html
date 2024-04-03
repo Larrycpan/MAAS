@@ -340,20 +340,7 @@ class="section level4">
 <h4>Determine the optimal clustering strategy</h4>
 <pre class="r"><code># Load MAAS results
 maas.res &lt;- readRDS(&quot;../5.MAAS/maas_res.rds&quot;)
-barcode.list &lt;- readRDS(&quot;../5.MAAS/maas.barcode.rds&quot;)
-clusPerformance &lt;- data.frame(matrix(nrow = length(maas.res)-1, ncol = 5), 
-                              row.names = paste0(&quot;dims=&quot;, 2:length(maas.res)))
-# Setting the clustering number 2:6
-colnames(clusPerformance) &lt;- paste0(&quot;k=&quot;, 2:6)
-for(i in 1:(length(maas.res)-1)){
-  for(j in 2:6){
-    df &lt;- as.data.frame(maas.res[[i]]$W)
-    df &lt;- df[-nrow(df),]
-    rownames(df) &lt;- barcode.list
-    maas.tmp.clu &lt;- withr::with_seed(2, kmeans(df, centers = j)$cluster)
-    clusPerformance[i,j-1] &lt;- clusteringMetric(df, clu = maas.tmp.clu, disMethod = &quot;euclidean&quot;)
-  }
-}</code></pre>
+barcode.list &lt;- readRDS(&quot;../5.MAAS/maas.barcode.rds&quot;)</code></pre>
 </div>
 <div id="using-the-optimal-clustering-strategy" class="section level4">
 <h4>Using the optimal clustering strategy</h4>
@@ -363,22 +350,21 @@ df &lt;- df[-nrow(df),]
 rownames(df) &lt;- barcode.list
 maas.clu &lt;- data.frame(Subpopulation = withr::with_seed(2, kmeans(df, centers = 2)$cluster))
 
-maas.pca &lt;- prcomp(df, center = T, scale. = T)$x[,1:2]
-maas.pca &lt;- cbind(maas.pca, maas.clu)
-maas.pca$Subpopulation &lt;- paste0(&quot;S&quot;, maas.pca$Subpopulation)
-saveRDS(maas.pca, &quot;maas.pca.rds&quot;)
-
-p &lt;- ggplot(maas.pca, aes(PC1, PC2))+
-  geom_point(aes(color = Subpopulation), alpha = 0.6, size = 2)+
+umap.res &lt;- umap(df,  learning_rate = 0.05, min_dist = 0, n_neighbors = 50, seed = 1234)
+umap.res &lt;- cbind(umap.res, maas.clu)
+umap.res$Subpopulation &lt;- paste0(&quot;S&quot;, umap.res$Subpopulation)
+colnames(umap.res) &lt;- c(&quot;UMAP1&quot;, &quot;UMAP2&quot;, &quot;Subpopulation&quot;)
+p &lt;- ggplot(umap.res, aes(UMAP1, UMAP2))+
+  geom_point(aes(color = Subpopulation), alpha = 0.6, size = 1.5)+
   scale_color_manual(values = my_color)+
   theme_dr()+
-  labs(x = &quot;PC1&quot;, y = &quot;PC2&quot;)+
+  # labs(x = &quot;UMAP1&quot;, y = &quot;UMAP2&quot;)+
   theme(panel.grid = element_blank(),
         axis.title = element_text(size = 14),
         axis.text = element_blank(),
         legend.text = element_text(size = 10))
-ggsave(&quot;CRC.MAAS.subpopulation.pca.pdf&quot;, p, width = 5, height = 4)</code></pre>
-<p><img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/CRC.MAAS.subpopulation.pca.png" width="30%" height="25%" style="display: block; margin: auto;" /></p>
+ggsave(&quot;CRC.MAAS.subpopulation.umap.pdf&quot;, p, width = 5, height = 4)</code></pre>
+<p><img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/CRC.MAAS.subpopulation.umap.png" width="30%" height="25%" style="display: block; margin: auto;" /></p>
 </div>
 <div id="reconstruct-phylogeny-with-maas-latent-factors"
 class="section level4">
