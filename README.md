@@ -5,7 +5,7 @@ chromatin data.
 
 <p align="center">
 
-<img src="https://github.com/Larrycpan/MAAS/assets/27127316/c192b126-2414-47d6-b603-e5234b370b43" width="500", height = 600>
+<img src="https://github.com/Larrycpan/MAAS/assets/27127316/c192b126-2414-47d6-b603-e5234b370b43" width="500", height = 600> 
 <p align="center">
 
 To use MAAS functions for integration, please run the following commands in __R__.
