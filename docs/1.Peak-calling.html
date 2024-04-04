@@ -441,7 +441,7 @@ projHeme5 &lt;- addCellColData(projHeme4, data = cell.meta$customclassif, cells 
 
 p &lt;- plotEmbedding(ArchRProj = projHeme5, colorBy = &quot;cellColData&quot;, name = &quot;Cell_type&quot;, embedding = &quot;UMAP&quot;)
 plotPDF(p, name = &quot;Plot-UMAP-Cell-type.pdf&quot;, ArchRProj = projHeme5, addDOC = FALSE, width = 5, height = 5)</code></pre>
-<p><img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/Plot-UMAP-Cell-type.png" width="60%" height="50%" style="display: block; margin: auto;" /></p>
+<p><img src="https://private-user-images.githubusercontent.com/27127316/319443035-aa16a0de-2851-4296-ab42-4c077981213a.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTIyMDUwNjMsIm5iZiI6MTcxMjIwNDc2MywicGF0aCI6Ii8yNzEyNzMxNi8zMTk0NDMwMzUtYWExNmEwZGUtMjg1MS00Mjk2LWFiNDItNGMwNzc5ODEyMTNhLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA0MDQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNDA0VDA0MjYwM1omWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWU2NTgxMDVhZGI0ZDYxMzcwY2JjZTU3Mzg5YjNjYmQ1MDdiZDRmOTc3MWU4NzQ1MTQ0OGRiMGI1ODBiMDIzMjQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.sOqSJQ0XGNLR5yWq4m2153eNCU2_2Iv7_wz8pGjo7Oc" width="60%" height="50%" style="display: block; margin: auto;" /></p>
 <pre class="r"><code># Save confident non-tumor cells
 normal.cell &lt;- rownames(cell.meta[cell.meta$customclassif != &quot;Intestinal epithelial cells&quot;,])
 normal.cell &lt;- data.frame(V1 = normal.cell, V2 = normal.cell)
