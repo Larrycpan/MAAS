@@ -1,7 +1,6 @@
 ## MAAS
 ### Overview
-Multimodal-based Analysis of scATAC-Seq (MAAS) is a method for idenfication of tumor subpopulations based on single-cell
-chromatin data.
+Single-cell Multimodal Analysis enables highly accurate delineation of clinically relevant tumor subpopulations.
 
 <p align="center">
 
