@@ -16,12 +16,55 @@ library(Rcpp)
 for (i in list.files("./src/", pattern="MAAS*")) {
   sourceCpp(paste0("./src/", i))
 }
+
+data <- readRDS("example.data/example.similarity.rds")
+maas.test <- MAAS(data$Peak, df$CNV, df$SNV, dims = 2:5)
+saveRDS(maas.test, "maas.res.all.rds")
 ```
 
-The key step of MAAS is integration, which is applied in a one-line-command
 ```
-maas_res <- MAAS(peak.similarity, cnv.similarity, snv.similarity, dims = 2:5)
+# Then we can do clustering based on the consensus latent factors
+#### Determine the optimal clustering strategy
+maas.res <- readRDS("../6.MAAS/maas.res.test.rds")
+barcode.list <- readRDS("../6.MAAS/share.barcode.rds")
+set.seed(1)
+barcode.list <- sample(barcode.list, 400)
+
+#### Using the optimal clustering strategy
+clusPerformance <- data.frame(matrix(nrow = length(maas.res)-1, ncol = 5),
+                              row.names = paste0("dims=", 2:length(maas.res)))
+colnames(clusPerformance) <- paste0("k=", 2:6)
+for(i in 1:(length(maas.res)-1)){
+  for(j in 2:6){
+    df <- as.data.frame(maas.res[[i]]$W)
+    rownames(df) <- barcode.list
+    maas.tmp.clu <- withr::with_seed(2, kmeans(df, centers = j)$cluster)
+    clusPerformance[i,j-1] <- clusteringMetric(maas.res[[i]]$W, clu = maas.tmp.clu, disMethod = "cosine")
+  }
+}
+
+#### Re-running clustering with the optimal performance
+df <- as.data.frame(maas.res[[4]]$W)
+rownames(df) <- barcode.list
+maas.clu <- data.frame(Cluster = withr::with_seed(2, kmeans(df, centers = 2)$cluster))
+maas.clu$Cluster <- as.factor(maas.clu$Cluster)
+saveRDS(ataclone.clu, "example.MAAS.clu.rds")
+
+#### Visualization
+umap.axis <- withr::with_seed(2, uwot::umap(df, n_neighbors = 50, metric = "manhattan", min_dist = 0.1, n_threads = 30))
+umap.axis <- as.data.frame(umap.axis); umap.axis$Cluster <- ataclone.clu$Cluster
+colnames(umap.axis) <- c("UMAP-1", "UMAP-2", "Cluster")
+ggplot(umap.axis, aes(`UMAP-1`, `UMAP-2`))+
+  geom_point(aes(color = Cluster), size = 1.75)+
+  scale_color_manual(values = my_color)+
+  theme_dr()+
+  labs(x = "UMAP-1", y = "UMAP-2")+
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 14),
+        axis.text = element_blank(),
+        legend.text = element_text(size = 12))
 ```
+
 Documentation and tutorials (full data preparation and integration) can be found at <https://larrycpan.github.io/MAAS/>. The example data has been uploaded to the folder example.data, which is the input for the [Running MAAS](https://larrycpan.github.io/MAAS/6.MAAS.html). If you would like to go through the whole analysis including data preparation, you can download data from [Zenodo](https://zenodo.org/) (doi: 10.5281/zenodo.10355916).
 
 We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
