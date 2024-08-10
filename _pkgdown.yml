@@ -26,6 +26,9 @@
         icon: fa-envelope
         href: Contact.html
 
+  articles:
+    title: "Vignettes"
+    
   output: 
     html_document:
     theme: cosmo
