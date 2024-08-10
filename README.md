@@ -1,6 +1,6 @@
 ## MAAS
 ### Overview
-Single-cell Multimodal Analysis enables highly accurate delineation of clinically relevant tumor subpopulations.
+Single-cell multimodal analysis enables highly accurate delineation of clinically relevant tumor cell subpopulations
 
 <p align="center">
 
