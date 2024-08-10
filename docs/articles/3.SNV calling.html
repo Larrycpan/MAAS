@@ -40,11 +40,13 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../index.html">Home</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Articles
+    <span class="fa fa-atom"></span>
+     
+    Vignettes
      
     <span class="caret"></span>
   </a>
@@ -72,12 +74,6 @@
     </li>
     <li>
       <a href="../articles/8.Functional%20enrichment.html">8.Functional enrichment</a>
-    </li>
-    <li>
-      <a href="../articles/Contact.html">Contact</a>
-    </li>
-    <li>
-      <a href="../articles/index.html">Tutorial of MAAS</a>
     </li>
   </ul>
 </li>
@@ -248,15 +244,15 @@ matrix for MAAS integration as follows.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hadley/reshape" class="external-link">reshape2</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">genotype</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="st">"step6_SingleCellAlleles/Tumor.single_cell_genotype.tsv"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">genotype</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"chr"</span></span>
-<span><span class="va">genotype1</span> <span class="op">&lt;-</span> <span class="va">genotype</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Num_reads</span> <span class="op">&gt;</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^chr"</span>, <span class="va">chr</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">genotype</span><span class="op">$</span><span class="va">ALT_expected</span> <span class="op">!=</span> <span class="st">"."</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">genotype</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"chr"</span></span>
+<span><span class="va">genotype1</span> <span class="op">&lt;-</span> <span class="va">genotype</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Num_reads</span> <span class="op">&gt;</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^chr"</span>, <span class="va">chr</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">genotype</span><span class="op">$</span><span class="va">ALT_expected</span> <span class="op">!=</span> <span class="st">"."</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">genotype1</span> <span class="op">&lt;-</span> <span class="va">genotype1</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>genotype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">Base_observed</span> <span class="op">==</span> <span class="fu">str_extract</span><span class="op">(</span><span class="va">ALT_expected</span>, <span class="st">"^[^,]+"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">(</span><span class="va">Cell_type_observed</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">Cell_type_expected</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>genotype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">Base_observed</span> <span class="op">==</span> <span class="fu">str_extract</span><span class="op">(</span><span class="va">ALT_expected</span>, <span class="st">"^[^,]+"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">(</span><span class="va">Cell_type_observed</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">Cell_type_expected</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">genotype1</span><span class="op">$</span><span class="va">pos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">genotype1</span><span class="op">$</span><span class="va">chr</span>, <span class="st">":"</span>, <span class="va">genotype1</span><span class="op">$</span><span class="va">Start</span>, <span class="st">":"</span>, <span class="va">genotype1</span><span class="op">$</span><span class="va">REF</span>, <span class="st">"&gt;"</span>, <span class="fu">str_extract</span><span class="op">(</span><span class="va">genotype1</span><span class="op">$</span><span class="va">ALT_expected</span>, <span class="st">"^[^,]+"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">snv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/dcast.data.table.html" class="external-link">dcast</a></span><span class="op">(</span><span class="va">genotype1</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CB"</span>, <span class="st">"pos"</span>, <span class="st">"genotype"</span><span class="op">)</span><span class="op">]</span>, <span class="va">pos</span> <span class="op">~</span> <span class="va">CB</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">snv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tibble/man/rownames.html" class="external-link">column_to_rownames</a></span><span class="op">(</span><span class="va">snv</span>, var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">snv</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">snv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tibble/man/rownames.html" class="external-link">column_to_rownames</a></span><span class="op">(</span><span class="va">snv</span>, var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">snv</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">snv1</span> <span class="op">&lt;-</span> <span class="va">snv</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">snv</span>, <span class="fl">1</span>, <span class="va">sum</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">10</span>,<span class="op">]</span>   <span class="co"># Maintain SNVs in at least 10 tumor cells</span></span>
 <span><span class="co"># saveRDS(snv1, "snv.mat.rds")</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">snv1</span>, <span class="st">"example.snv.csv"</span><span class="op">)</span></span></code></pre></div>

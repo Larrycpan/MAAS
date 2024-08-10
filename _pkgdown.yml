@@ -3,4 +3,23 @@ navbar:
     - text: "Home"
       href: index.html
     - text: "Vignettes"
-      href: articles/index.html
+      icon: fa-atom
+      menu:
+        - text: "1.scATAC-seq data analysis"
+          href: articles/1.scATAC-seq data analysis.html
+        - text: "2.CNV calling"
+          href: articles/2.CNV calling.html
+        - text: "3.SNV calling"
+          href: articles/3.SNV calling.html
+        - text: "4.Peak correction"
+          href: articles/4.Peak correction.html
+        - text: "5.SNV correction"
+          href: articles/5.SNV correction.html
+        - text: "6.MAAS"
+          href: articles/6.MAAS.html
+        - text: "7.Clustering"
+          href: articles/7.Clustering.html
+        - text: "8.Functional enrichment"
+          href: articles/8.Functional enrichment.html
+          
+          

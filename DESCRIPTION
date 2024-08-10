@@ -6,7 +6,6 @@ Authors@R: c(
     person(given = "Ruofan", family = "Ding",        email = "dingruofan1@foxmail.com",   role  = c("aut", "cre")),
     person(given = "Lei", family = "Li",        email = "lei.li@szbl.ac.cn",   role  = c("aut","ctb", "cph"))
 	)
-Description: Source for single-cell multimodal analysis to detect tumor cell subpopulations.
 URL: https://github.com/Larrycpan/MAAS/
 BugReports: https://github.com/Larrycpan/MAAS/issues
 License: GPL (>= 3)
@@ -21,3 +20,4 @@ VignetteBuilder:
 Imports: 
     Rcpp
     Seurat
+    Signac
