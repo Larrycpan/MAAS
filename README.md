@@ -37,9 +37,6 @@ If you encounter a bug or have a feature request, please open an [Issues](https:
 If you would like to discuss questions related to single-cell analysis,
 you can open a [Discussions](https://github.com/Larrycpan/MAAS/discussions).
 
-### Citation
-
-If you use data preparation schemes or MAAS in your work, please cite <xxx>.
 
 ### Related packages
 -  [Signac](https://stuartlab.org/signac/)
