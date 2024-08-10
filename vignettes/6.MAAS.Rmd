@@ -1,0 +1,72 @@
+---
+title: "6.MAAS"
+output:
+  html_document:
+    df_print: paged
+vignette:  >
+  %\VignetteIndexEntry{6.MAAS} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+# Clear working space and load libraries
+rm(list = ls())
+library(dplyr)
+library(Rcpp)
+# Load MAAS Rcpp functions
+for (i in list.files("./src/", pattern="MAAS*")) {
+  sourceCpp(paste0("./src/", i))
+}
+```
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+# Load data
+# CNV
+cnv <- read.csv("../2.CNV_calling/cancer.cnv.csv", row.names = 1, check.names = F)
+rownames(cnv) <- gsub("cell.", "", rownames(cnv))
+rownames(cnv) <- gsub("\\.", "-", rownames(cnv))
+# Peak
+peak <- readRDS("../4.Peak_correction/peak.mat.rds")
+# SNV
+snv <- read.csv("../3.SNV_calling/example.snv.csv", row.names = 1)
+colnames(snv) <- paste0(colnames(snv), "-1")
+snv1 <- read.csv("../5.SNV_correction/example.mut1.csv") %>% t() %>% as.data.frame()
+rownames(snv1) <- rownames(snv); colnames(snv1) <- colnames(snv)
+
+share.barcode <- Reduce(intersect, list(colnames(peak), colnames(snv), rownames(cnv)))
+saveRDS(share.barcode, "share.barcode.rds")
+
+# Randonly sample 400 cells to speed up
+set.seed(1)
+cell1 <- sample(share.barcode, 400)
+
+#
+peak <- t(peak)
+peak.raw <- peak[cell1,] %>% as.matrix()
+cnv.raw <- cnv[cell1,] %>% as.matrix()
+snv.raw <- as.data.frame(t(snv))[cell1,] %>% as.matrix()
+saveRDS(cnv.raw, "cnv.combined.rds")
+saveRDS(snv.raw, "snv.combined.rds")
+
+###############################################################################
+
+# Calculate cell similarity
+peak.similarity <- 1- as.matrix(parallelDist::parDist(as.matrix(peak.raw), method = "cosine", threads = 40))
+cnv.similarity <- 1- as.matrix(parallelDist::parDist(as.matrix(cnv.raw), method = "cosine", threads = 40))
+snv.similarity <- 1- as.matrix(parallelDist::parDist(as.matrix(snv.raw), method = "hamming", threads = 40))
+
+maas.test <- MAAS(peak.similarity, cnv.similarity, snv.similarity, dims = 2:5)
+saveRDS(maas.test, "maas.res.test.rds")
+write.csv(maas.test[[length(maas.test)]], "parameter.iter.test.csv")
+```

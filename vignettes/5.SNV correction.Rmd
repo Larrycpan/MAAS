@@ -1,0 +1,43 @@
+---
+title: "5.SNV correction"
+output:
+  html_document:
+    df_print: paged
+vignette:  >
+  %\VignetteIndexEntry{5.SNV correction} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+We adapt the script made by [Z chen et al.](https://github.com/ucasdp/RobustClone) of robust PCA (RPCA) for mutation data analysis, and thanks for their contributions. \
+
+One should put all Matlab scripts in the same folder, and execute the `main.m` for their own data.
+
+```{octave, message=FALSE, warning=FALSE, eval=FALSE}
+clear
+ 
+D=csvread('./example.snv.csv',1,1);
+D=D'
+
+[m,n]=size(D); 
+ms=0; % value represents missing.
+omega=find(D~=ms); 
+omegaC=find(D==ms);
+lambda=1/sqrt(max(m,n))*(1+5*length(omegaC)/(m*n));
+[A1,E1]= RPCA(D,omega,lambda);
+
+%% Integralization
+AA1=int8(A1);
+AA1=table(AA1)
+writetable(AA1, 'example.mut1.csv');
+```

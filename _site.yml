@@ -1,0 +1,37 @@
+---
+  name: "MAAS tutorial"
+  navbar:
+    title: "MAAS"
+    left:
+      - text: "Get started"
+        icon: fa-atom
+        menu: 
+          - text: "1.scATAC-seq data analysis"
+            href: 1.scATAC-seq-data-analysis.html
+          - text: "2.CNV calling"
+            href: 2.CNV-calling.html
+          - text: "3.SNV calling" 
+            href: 3.SNV-calling.html
+          - text: "4.Peak correction"
+            href: 4.Peak-correction.html
+          - text: "5.SNV correction"
+            href: 5.SNV-correction.html
+          - text: "6.MAAS"
+            href: 6.MAAS.html
+          - text: "7.Clustering"
+            href: 7.Clustering.html
+          - text: "8.Functional enrichment"
+            href: 8.Functional-enrichment.html
+      - text: "Contact"
+        icon: fa-envelope
+        href: Contact.html
+
+  output: 
+    html_document:
+    theme: cosmo
+    highlight: textmate
+    toc: yes
+    toc_depth: 20
+    toc_float: yes
+---
+  

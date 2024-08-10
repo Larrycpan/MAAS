@@ -1,0 +1,55 @@
+---
+title: "4.Peak correction"
+output:
+  html_document:
+    df_print: paged
+vignette:  >
+  %\VignetteIndexEntry{4.Peak correction} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+To ensure our results are not biased by CNVs, which often affect the quantification of chromatin accessibility, MAAS implements a weighted correction strategy to adjust for this confounding effect.
+
+```{r "Peak correction", message=FALSE, warning=FALSE, eval=FALSE}
+rm(list = ls())
+library(Signac)
+library(dplyr)
+library(Rcpp)
+sourceCpp("/MAAS-main/src/MAAS_adjustPeak.cpp")
+sourceCpp("/MAAS-main/src/MAAS_intersectRegions.cpp")
+
+# Load seurat object
+combined.pro <- readRDS("../1.Cellanno/scATAC.HCC.pro.annotated.rds")
+DefaultAssay(combined.pro) <- "peaks"
+combined.pro <- FindTopFeatures(combined.pro, min.cutoff = ncol(combined.pro) * 0.05)
+peak <- combined.pro %>% GetAssayData(slot = "counts")
+rownames(peak) <- gsub("^(chr[0-9XY]+)-", "\\1:", rownames(peak))
+peak <- peak[grepl("^chr", rownames(peak)),]
+
+# Load CNV profile
+cnv <- read.csv("../3.tumorcell/cancer.cnv.csv", row.names = 1, check.names = F)
+rownames(cnv) <- gsub("cell.", "", rownames(cnv)); rownames(cnv) <- gsub("\\.", "-", rownames(cnv))
+cnv <- cnv + 1
+pattern <- "chr(\\w+)\\.(\\d+)\\.(\\d+)\\.(\\w+)\\."
+colnames(cnv) <- gsub(pattern, "chr\\1:\\2-\\3", colnames(cnv))
+
+# Using MAAS to adjust peaks
+overlapRegion <- intersectRegions(peaks = rownames(peak), cnvs = colnames(cnv))
+peak.corrected <- adjustPeak(as.matrix(t(peak)), as.matrix(cnv), overlapRegion, eta = 0.5)
+
+## Create seurat object for TF-IDF normalization
+new.obj <- CreateSeuratObject(t(peak.corrected))
+new.obj <- RunTFIDF(new.obj)
+peak.corrected.norm <- log2(new.obj@assays$RNA@data + 1)
+saveRDS(peak.corrected.norm, "peak.mat.rds")
+```

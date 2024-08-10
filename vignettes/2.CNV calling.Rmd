@@ -1,0 +1,105 @@
+---
+title: "2.CNV calling"
+output:
+  html_document:
+    df_print: paged
+vignette:  >
+  %\VignetteIndexEntry{1.CNV calling} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+Here we use the R package [epiAneufinder](https://github.com/colomemaria/epiAneufinder) to call copy numbers for each cell.
+
+```{r "Load libraries", message=FALSE, warning=FALSE, eval=FALSE}
+# Clear workspace and load libraries
+rm(list = ls())
+library(epiAneufinder)
+```
+
+```{r "CNV calling", message=FALSE, warning=FALSE, eval=FALSE}
+epiAneufinder(input="/Path/to/fragments.tsv.gz",
+              outdir="./",
+              blacklist="/Path/to/bed/file/containing/hg38-blacklist.v2.bed",
+              windowSize = 1e5, 
+              genome = "BSgenome.Hsapiens.UCSC.hg38",
+              exclude = c('chrX', 'chrY','chrM'), 
+              reuse.existing = TRUE,
+              title_karyo="", 
+              ncores = 65,
+	            plotKaryo=F,
+              minFrags = 20000)
+```
+
+********************************************************************************
+After finishing running `epiAneufinder`, you will get the a folder named `epiAneufinder_results` in the current directory. Then we should can intersect the CNV results with the cell type information to obtain the CNV profile of tumor cells.
+
+```{r "Identifying tumor cells", message=FALSE, warning=FALSE, eval=FALSE}
+celltype <- read.table("../1.Cellanno/HCC.celltype.txt", header = T, check.names = F)
+candidate.cell <- celltype[celltype$Cell_type == "Tumor",]
+candidate.cell <- candidate.cell$Index
+# length(intersect(rownames(df), tumor.cell))
+
+chrom.range <- fread("/Path/to/cytoBand.txt.gz", col.names = c("chrom","Start","End","arm","gieStain")) ## Users can download this file from zenodo
+chrom.list <- paste0("chr",c(1:22, "X", "Y"))
+chrom.range <- chrom.range[which(chrom.range$chrom %in% chrom.list),]
+chrom.range <- dplyr::select(chrom.range, -c(gieStain))
+chrom.range$arm <- substr(chrom.range$arm, 1,1)
+chrom.range <- chrom.range %>%
+  mutate(chrom_band = paste(chrom, arm, sep = ""))
+chrom.range <- chrom.range %>%
+  group_by(chrom_band) %>%
+  dplyr::summarise(start = min(Start),
+                   end = max(End))
+chrom.range$chrom <- gsub("([[:alnum:]]+)[[:alpha:]]+$", "\\1", chrom.range$chrom_band)
+
+# 读取calling结果
+df <- read.table("/Path/to/epiAneufinder_results/results_table.tsv", row.names = 1)
+input.range <- df[,1:3]
+df$range <- paste0(df$seq, ":", df$start, "-", df$end)
+df <- dplyr::select(df, -c(seq, start, end))
+rownames(df) <- df$range
+df <- dplyr::select(df, -c(range))
+df <- as.data.frame(t(df))
+deter.arm <- c()
+for(i in 1:nrow(input.range)){
+  chr.tmp <- input.range$seq[i]
+  start.tmp <- input.range$start[i]
+  end.tmp <- input.range$end[i]
+  chrom.range.tmp <- chrom.range[which(chrom.range$chrom == chr.tmp &
+                                         chrom.range$start <= start.tmp &
+                                         chrom.range$end >= end.tmp),]
+  deter.arm[i] <- chrom.range.tmp$chrom_band
+}
+deter.arm <- substr(deter.arm, nchar(deter.arm), nchar(deter.arm))
+colnames(df) <- paste0(colnames(df), "(", deter.arm, ")")
+
+rownames(df) <- gsub("cell.", "", rownames(df))
+rownames(df) <- gsub("\\.", "-", rownames(df))
+
+share.cell <- intersect(candidate.cell, rownames(df))
+df <- df[share.cell,]
+write.csv(df, "cancer.cnv.csv")
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+temp1 <- tempfile(fileext=".zip")
+download.file("http://bioinfo.szbl.ac.cn/share/MAAS_data/cancer.cnv.RData.zip", temp1)
+load(unz(temp1, "cancer.cnv.RData"))
+close(file(temp1))
+rm(temp1)
+```
+
+```{r "mayores", message=F, warning=FALSE}
+df[1:5,1:5]
+```

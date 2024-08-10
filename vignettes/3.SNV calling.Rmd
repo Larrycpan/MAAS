@@ -1,0 +1,184 @@
+---
+title: "3.SNV calling"
+output:
+  html_document:
+    df_print: paged
+vignette:  >
+  %\VignetteIndexEntry{3.SNV calling} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+We used [SComatic](https://github.com/cortes-ciriano-lab/SComatic) to obtain SNV profile of tumor cells from scATAC-seq data.
+
+```{r "SComatic calling", message=FALSE, warning=FALSE, eval=FALSE}
+# Create a directory for SNV calling in the terminal
+mkdir -p 3.SNV_calling
+
+# Step1: split bam files for different cell types
+utput_dir1=step1_BamCellTypes
+mkdir -p $output_dir1
+
+python ~/App/SComatic-main/scripts/SplitBam/SplitBamCellTypes.py \
+        --bam /Path/to/bam/file \
+        --meta ../1.Cellanno/HCC.celltype.txt\
+        --id example \
+        --min_MQ 30 \
+        --outdir $output_dir1
+
+################################################################################
+
+# Step2: summarize base count
+REF=/Path/to/refdata-cellranger-arc-GRCh38-2020-A-2.0.0/fasta/genome.fa
+  
+output_dir2=step2_BaseCellCounts
+mkdir -p $output_dir2
+
+for bam in $(ls -d ./step1_BamCellTypes/*bam);do
+        # Cell type
+        cell_type=$(basename $bam | awk -F'.' '{print $(NF-1)}')
+
+        # Temp folder
+        temp=$output_dir2/temp_${cell_type}
+        mkdir -p $temp
+
+        # Command line to submit to cluster
+        python ~/App/SComatic-main/scripts/BaseCellCounter/BaseCellCounter.py --bam $bam \
+                --ref $REF \
+                --chrom all \
+                --out_folder $output_dir2 \
+                --bed /Path/to/ATAC/bed/file \
+                --min_bq 30 \
+                --min_mq 30 \
+                --tmp_dir $temp \
+                --nprocs 30
+
+        rm -rf $temp
+done
+
+################################################################################
+
+# Step3: merge counts
+output_dir3=step3_BaseCellCountsMerged
+mkdir -p $output_dir3
+
+python ~/App/SComatic-main/scripts/MergeCounts/MergeBaseCellCounts.py --tsv_folder ./step2_BaseCellCounts --outfile ${output_dir3}/BaseCellCounts.AllCellTypes.tsv
+
+################################################################################
+
+# Step4: Mutation detection
+# Step 4.1
+output_dir4=/step4_VariantCalling
+mkdir -p $output_dir4
+
+sample=example
+
+python ~/App/SComatic-main/scripts/BaseCellCalling/BaseCellCalling.step1.py \
+                  --infile step3_BaseCellCountsMerged/BaseCellCounts.AllCellTypes.tsv \
+                  --outfile ${output_dir4}/${sample} \
+                  --ref $REF
+
+# Step 4.2
+PON=/Path/to/PoN.scATACseq.hg38.tsv
+
+python ~/App/SComatic-main/scripts/BaseCellCalling/BaseCellCalling.step2.py \
+                  --infile ${output_dir4}/${sample}.calling.step1.tsv \
+                  --outfile ${output_dir4}/${sample} \
+                  --pon $PON
+
+################################################################################
+
+# Step5: site calling
+STEP4_1=/step4_VariantCalling/${sample}.calling.step1.tsv
+
+output_dir5=step5_UniqueCellCallableSites
+mkdir -p $output_dir5
+
+for bam in $(ls -d ./step1_BamCellTypes/*bam);do
+            cell_type=$(basename $bam | awk -F'.' '{print $(NF-1)}')
+            echo $cell_type
+
+            temp=$output_dir5/temp_${cell_type}
+            mkdir -p $temp
+
+            python ~/App/SComatic-main/scripts/SitesPerCell/SitesPerCell.py --bam $bam    \
+                    --infile ./step4_VariantCalling/${sample}.calling.step1.tsv   \
+                    --min_mq 30 \
+                    --ref $REF \
+                    --out_folder $output_dir5 \
+                    --tmp_dir $temp \
+                    --nprocs 60
+            echo
+done
+
+################################################################################
+
+# Step6: get genotypes
+
+output_dir6=step6_SingleCellAlleles
+mkdir -p $output_dir6
+
+for bam in $(ls -d ./step1_BamCellTypes/*bam);do
+
+        cell_type=$(basename $bam | awk -F'.' '{print $(NF-1)}')
+
+        temp=$output_dir6/temp_${cell_type}
+        mkdir -p $temp
+
+        python ~/App/SComatic-main/scripts/SingleCellGenotype/SingleCellGenotype.py --bam $bam  \
+                --infile ${STEP4_2_pass}   \
+                --nprocs 30   \
+                --meta $META   \
+                --outfile ${output_dir6}/${cell_type}.single_cell_genotype.tsv  \
+                --tmp_dir $temp  \
+                --min_mq 30 \
+                --ref $REF
+
+        rm -rf $temp
+done
+```
+
+After running the pipeling of SComatic, we can generate a cell-by-SNV matrix for MAAS integration as follows.
+```{r "SNV matrix", message=FALSE, warning=FALSE, eval=FALSE}
+rm(list = ls())
+library(data.table)
+library(dplyr)
+library(tibble)
+library(reshape2)
+
+genotype <- fread("step6_SingleCellAlleles/Tumor.single_cell_genotype.tsv")
+colnames(genotype)[1] <- "chr"
+genotype1 <- genotype %>% dplyr::filter(Num_reads > 2 & grepl("^chr", chr) & genotype$ALT_expected != ".")
+
+genotype1 <- genotype1 %>%
+  dplyr::mutate(genotype = ifelse(Base_observed == str_extract(ALT_expected, "^[^,]+") & (Cell_type_observed %in% Cell_type_expected), 1, 0))
+genotype1$pos <- paste0(genotype1$chr, ":", genotype1$Start, ":", genotype1$REF, ">", str_extract(genotype1$ALT_expected, "^[^,]+"))
+
+snv <- dcast(genotype1[,c("CB", "pos", "genotype")], pos ~ CB, drop = FALSE)
+snv <- column_to_rownames(snv, var = colnames(snv)[1])
+snv1 <- snv[apply(snv, 1, sum) >= 10,]   # Maintain SNVs in at least 10 tumor cells
+# saveRDS(snv1, "snv.mat.rds")
+write.csv(snv1, "example.snv.csv")
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+temp1 <- tempfile(fileext=".zip")
+download.file("http://bioinfo.szbl.ac.cn/share/MAAS_data/snv1.RData.zip", temp1)
+load(unz(temp1, "snv1.RData"))
+close(file(temp1))
+rm(temp1)
+```
+
+```{r "head SNV", message=F, warning=FALSE}
+snv1[1:5,1:5]
+```

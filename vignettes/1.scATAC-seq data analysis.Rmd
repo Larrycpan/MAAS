@@ -1,0 +1,212 @@
+---
+title: "1.scATAC-seq data analysis"
+output: 
+  html_document:
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{1.1.scATAC-seq data analysis} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+Here we use the R package [Signac](https://stuartlab.org/signac/) to processing scATAC-seq peak data. The example data has been updated to Zenodo.
+
+```{r "Load libraries", message=FALSE, warning=FALSE, eval=FALSE}
+# Clear workspace and load libraries
+rm(list = ls())
+library(Signac)
+library(Seurat)
+library(SeuratWrappers)
+library(GenomeInfoDb)
+library(EnsDb.Hsapiens.v86)
+library(ggplot2)
+library(patchwork)
+library(future)
+plan("multisession", workers = 10)
+options(future.globals.maxSize = 50000 * 1024^2)
+library(GenomicRanges)
+library(ggpubr)
+set.seed(101)
+
+if(!dir.exists("1.Cellanno"){dir.create("1.Cellanno")})
+```
+
+********************************************************************************
+### Creating a Seurat object
+```{r "scATAC processing", message=FALSE, warning=FALSE, eval=FALSE}
+counts <- Read10X_h5("/Path/to/filtered_peak_bc_matrix.h5")
+metadata <- read.csv(file = "/Path/to/singlecell.csv", header = TRUE, row.names = 1)
+
+chrom_assay <- CreateChromatinAssay(counts = counts, sep = c(":", "-"), fragments = '/Path/to/fragments.tsv.gz', min.cells = 10, min.features = 200)
+
+HCC <- CreateSeuratObject(counts = chrom_assay, assay = "peaks", meta.data = metadata)
+
+# extract gene annotations from EnsDb
+annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
+# change to UCSC style since the data was mapped to hg38
+seqlevelsStyle(annotations) <- 'UCSC'
+genome(annotations) <- "hg38"
+# add the gene information to the object
+Annotation(HCC) <- annotations
+
+# Quality Control
+# compute nucleosome signal score per cell
+HCC <- NucleosomeSignal(object = HCC)
+# compute TSS enrichment score per cell
+HCC <- TSSEnrichment(object = HCC, fast = FALSE, assay = 'peaks', verbose = T)
+# add blacklist ratio and fraction of reads in peaks
+HCC$pct_reads_in_peaks <- HCC$peak_region_fragments / HCC$passed_filters * 100
+HCC$blacklist_ratio <- HCC$blacklist_region_fragments / HCC$peak_region_fragments
+HCC$high.tss <- ifelse(HCC$TSS.enrichment > 2, 'High', 'Low')
+HCC$nucleosome_group <- ifelse(HCC$nucleosome_signal > 4, 'NS > 4', 'NS < 4')
+VlnPlot(
+  object = HCC,
+  features = c('pct_reads_in_peaks', 'peak_region_fragments','TSS.enrichment', 'blacklist_ratio', 'nucleosome_signal'),
+  pt.size = 0.05,
+  ncol = 5
+)
+saveRDS(HCC, file = "scATAC.HCC.rds")
+
+## remove outlier cells based on QC metrics:
+HCC.pro <- subset(
+  x = HCC,
+  subset = peak_region_fragments > 1000 &
+    peak_region_fragments < 20000 &
+    pct_reads_in_peaks > 15 &
+    blacklist_ratio < 0.05 &
+    nucleosome_signal < 4 &
+    TSS.enrichment > 3
+)
+saveRDS(HCC.pro, file = "scATAC.HCC.pro.rds")
+```
+
+********************************************************************************
+### Cell annotation using gene activity scores
+
+```{r "Cell annotation", message=FALSE, warning=FALSE, eval=FALSE}
+scATAC.HCC.pro <- RunTFIDF(HCC.pro)
+scATAC.HCC.pro <- FindTopFeatures(scATAC.HCC.pro, min.cutoff = 'q5')
+
+#
+scATAC.HCC.pro <- RunSVD(scATAC.HCC.pro)
+# Non-linear dimension reduction and clustering
+scATAC.HCC.pro <- RunUMAP(scATAC.HCC.pro, dims = 2:20, reduction = 'lsi')
+scATAC.HCC.pro <- FindNeighbors(object = scATAC.HCC.pro, reduction = 'lsi', dims = 2:20)
+scATAC.HCC.pro <- FindClusters(object = scATAC.HCC.pro, resolution = 0.05)
+DimPlot(object = scATAC.HCC.pro, label = TRUE) + NoLegend()
+
+#####################3.gene activity########################
+gene.activities <- GeneActivity(scATAC.HCC.pro)
+scATAC.HCC.pro[['ACTIVITY']] <- CreateAssayObject(counts = gene.activities)
+scATAC.HCC.pro <- NormalizeData(
+  object = scATAC.HCC.pro,
+  assay = 'ACTIVITY',
+  normalization.method = 'LogNormalize',
+  scale.factor = median(scATAC.HCC.pro$nCount_peaks)
+)
+saveRDS(scATAC.HCC.pro, file = "scATAC.HCC.pro.rds")
+
+
+################### Cell annotation #######################
+allMarkers <- FindAllMarkers(scATAC.HCC.pro, assay = "ACTIVITY", test.use = "MAST", latent.vars = "nCount_peaks")
+pkgs <- c("tidyr","tibble","reshape2")
+sapply(pkgs, require, character.only = TRUE)
+library(scMayoMap)
+# run ScType
+obj <- scMayoMap(data = allMarkers, tissue = 'liver')
+res <- obj$res
+```
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+temp1 <- tempfile(fileext=".zip")
+download.file("http://bioinfo.szbl.ac.cn/share/MAAS_data/mayo.res.RData.zip", temp1)
+load(unz(temp1, "mayo.res.RData"))
+close(file(temp1))
+rm(temp1)
+```
+
+```{r "mayores", message=F, warning=FALSE}
+head(res)
+```
+
+```{r "marker plot", message=FALSE, warning=FALSE, eval=FALSE}
+list_genes <- list(Tcell = c("CD8A", "CD28", "PTPRC"),
+                   Bcell = c("CD27", "IL21R", "RASGRP3", "POU2AF1"),
+                   Tumor = c("FOXA2","FOXA1", "ALB", "AFP"),
+                   `Liver bud hepatic cell` = c("ACSL1","SOD2","RAB31","FTH1"))
+
+DefaultAssay(a) <- "alra"
+p <- DotPlot(scATAC.HCC.pro, cols = c("#1e90ff", "#ff5a36"), features = list_genes, group.by = "seurat_clusters", dot.scale = 5) +
+  RotatedAxis() +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_blank(),
+        panel.border = element_rect(color="black"),
+        panel.spacing = unit(1, "mm"),
+        strip.text = element_text(margin=ggplot2::margin(b=3, unit="mm")),
+        strip.placement = 'outlet',
+        axis.line = element_blank())
+p[["data"]][["id"]] <- factor(p[["data"]][["id"]], levels = rev(c(2,3,0,1)))
+print(p)
+```
+
+```{r, cell.marker.dotplot.png, fig.align = 'center', fig.height = 3, fig.width = 4, out.height = "50%", out.width = "60%", echo=FALSE}
+knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/cell.marker.dotplot.png")
+```
+
+```{r "Cell label", message=FALSE, warning=FALSE, eval=FALSE}
+cluster.label <- scATAC.HCC.pro@meta.data$seurat_clusters
+cluster.label <- gsub("^0$", "Tumor", cluster.label)
+cluster.label <- gsub("^1$", "Liver_bug_hepatic_cell", cluster.label)
+cluster.label <- gsub("^2$", "T_cell", cluster.label)
+cluster.label <- gsub("^3$", "B_cell", cluster.label)
+scATAC.HCC.pro <- AddMetaData(scATAC.HCC.pro, cluster.label, col.name = "Celltype")
+saveRDS(scATAC.HCC.pro, "scATAC.HCC.pro.annotated.rds")
+
+# Visualize marker genes of tumor cells
+a <- scATAC.HCC.pro
+a <- RunALRA(a)
+FeaturePlot(a, features = list_genes$Tumor)
+```
+
+```{r, Tumor.feature.plot.png, fig.align = 'center', fig.height = 3, fig.width = 4, out.height = "50%", out.width = "60%", echo=FALSE}
+knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/Tumor.feature.plot.png")
+```
+
+```{r "umap plot", message=FALSE, warning=FALSE, eval=FALSE}
+DimPlot(object = scATAC.HCC.pro, reduction = 'umap',label = T, group.by = "seurat_clusters", cols = circus)+
+  theme_dr()+
+  NoLegend()+
+  theme(plot.title = element_blank(),
+        panel.grid = element_blank())+
+  guides(fill = "none")
+DimPlot(object = scATAC.HCC.pro, reduction = 'umap',label = TRUE, group.by = "Celltype", cols = cell_type_cols)+
+  theme_dr()+
+  NoLegend()+
+  theme(plot.title = element_blank(),
+        panel.grid = element_blank())+
+  guides(fill = "none")
+```
+
+```{r, cellanno.umap.png, fig.align = 'center', fig.height = 3, fig.width = 5, out.height = "50%", out.width = "60%", echo=FALSE}
+knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/cellanno.umap.png")
+```
+
+```{r "Cell type export", message=FALSE, warning=FALSE, eval=FALSE}
+#### Export cell type information
+celltype <- scATAC.HCC.pro@meta.data[,"Celltype",drop = F]
+celltype$Index <- rownames(celltype)
+celltype <- celltype[,c("Index", "Celltype")]
+colnames(celltype) <- c("Index", "Cell_type")
+write.table(celltype, "HCC.celltype.txt", sep = '\t', quote = F, row.names = F, col.names = T)
+```
+

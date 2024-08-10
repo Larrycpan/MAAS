@@ -1,0 +1,23 @@
+Package: MAAS
+Title: Single-cell multimodal analysis enables highly accurate delineation of clinically relevant tumor cell subpopulations
+Version: 1.0.0
+Authors@R: c(
+    person(given = "Kewei", family = "Xiong",        email = "kxiongac@connect.ust.hk",   role  = c("aut","cre")),
+    person(given = "Ruofan", family = "Ding",        email = "dingruofan1@foxmail.com",   role  = c("aut", "cre")),
+    person(given = "Lei", family = "Li",        email = "lei.li@szbl.ac.cn",   role  = c("aut","ctb", "cph"))
+	)
+Description: Source for single-cell multimodal analysis to detect tumor cell subpopulations.
+URL: https://github.com/Larrycpan/MAAS/
+BugReports: https://github.com/Larrycpan/MAAS/issues
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 3.6)
+VignetteBuilder:
+    knitr
+Imports: 
+    Rcpp
+    Seurat

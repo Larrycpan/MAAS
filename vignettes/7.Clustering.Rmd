@@ -1,0 +1,81 @@
+---
+title: "7.Clustering"
+output:
+  html_document:
+    df_print: paged
+vignette:  >
+  %\VignetteIndexEntry{7.Clustering} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  progress =FALSE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+# Clear working space and load libraries
+rm(list = ls())
+library(tidydr)
+library(foreach)
+library(doParallel)
+library(dplyr)
+library(parallelDist)
+source("src/clusteringMetric.R")
+my_color <- c("#5050FF", "#CE3D32", "#749B58", "#F0E685", "#00BFC4", "#B79F00", "#00BA38")
+```
+
+#### Determine the optimal clustering strategy
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+# Load MAAS results
+maas.res <- readRDS("../6.MAAS/maas.res.test.rds")
+barcode.list <- readRDS("../6.MAAS/share.barcode.rds")
+set.seed(1)
+barcode.list <- sample(barcode.list, 400)
+```
+
+#### Using the optimal clustering strategy
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+clusPerformance <- data.frame(matrix(nrow = length(maas.res)-1, ncol = 5),
+                              row.names = paste0("dims=", 2:length(maas.res)))
+colnames(clusPerformance) <- paste0("k=", 2:6)
+for(i in 1:(length(maas.res)-1)){
+  for(j in 2:6){
+    df <- as.data.frame(maas.res[[i]]$W)
+    rownames(df) <- barcode.list
+    maas.tmp.clu <- withr::with_seed(2, kmeans(df, centers = j)$cluster)
+    clusPerformance[i,j-1] <- clusteringMetric(maas.res[[i]]$W, clu = maas.tmp.clu, disMethod = "cosine")
+  }
+}
+
+# Re-running clustering with the optimal performance
+df <- as.data.frame(maas.res[[4]]$W)
+rownames(df) <- barcode.list
+maas.clu <- data.frame(Cluster = withr::with_seed(2, kmeans(df, centers = 2)$cluster))
+maas.clu$Cluster <- as.factor(maas.clu$Cluster)
+saveRDS(ataclone.clu, "example.MAAS.clu.rds")
+
+## Visualization
+umap.axis <- withr::with_seed(2, uwot::umap(df, n_neighbors = 50, metric = "manhattan", min_dist = 0.1, n_threads = 30))
+umap.axis <- as.data.frame(umap.axis); umap.axis$Cluster <- ataclone.clu$Cluster
+colnames(umap.axis) <- c("UMAP-1", "UMAP-2", "Cluster")
+ggplot(umap.axis, aes(`UMAP-1`, `UMAP-2`))+
+  geom_point(aes(color = Cluster), size = 1.75)+
+  scale_color_manual(values = my_color)+
+  theme_dr()+
+  labs(x = "UMAP-1", y = "UMAP-2")+
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(size = 14),
+        axis.text = element_blank(),
+        legend.text = element_text(size = 12))
+```
+
+```{r, HCC.MAAS.cluster.umap.png, fig.align = 'center', fig.height = 4, fig.width = 5, out.height = "25%", out.width = "30%", echo=FALSE}
+knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/HCC.MAAS.cluster.umap.png")
+```
