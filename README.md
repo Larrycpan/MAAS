@@ -10,6 +10,7 @@ Single-cell multimodal analysis enables highly accurate delineation of clinicall
 
 <p align="center">
 
+### Quick start
 To use MAAS functions for integration, please run the following commands in __R__. We provide example data of cell similarities for the three modalities formatted as `list` R object.
 ```
 library(Rcpp)
