@@ -6,7 +6,7 @@ Single-cell Multimodal Analysis enables highly accurate delineation of clinicall
 
 
 
-<img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/Figure_1.png" alt="Flowchart" style="width: 70%">
+<img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/Figure 1.png" alt="Flowchart" style="width: 70%">
 
 <p align="center">
 
