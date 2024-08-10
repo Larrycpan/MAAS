@@ -42,5 +42,6 @@ you can open a [Discussions](https://github.com/Larrycpan/MAAS/discussions).
 If you use data preparation schemes or MAAS in your work, please cite <xxx>.
 
 ### Related packages
--   [ArchR](https://www.archrproject.com/)
--   [epiAneufinder](https://github.com/colomemaria/epiAneufinder)
+-  [Signac](https://stuartlab.org/signac/)
+-  [epiAneufinder](https://github.com/colomemaria/epiAneufinder)
+-  [SComatic](https://github.com/cortes-ciriano-lab/SComatic)
