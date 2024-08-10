@@ -66,6 +66,8 @@ ggplot(umap.axis, aes(`UMAP-1`, `UMAP-2`))+
         legend.text = element_text(size = 12))
 ```
 
+<img src="http://bioinfo.szbl.ac.cn/share/MAAS_data/HCC.MAAS.cluster.umap.png" alt="Flowchart" style="width: 70%">
+
 Documentation and tutorials (full data preparation and integration) can be found at <https://larrycpan.github.io/MAAS/>. The example data has been uploaded to the folder example.data, which is the input for the [Running MAAS](https://larrycpan.github.io/MAAS/6.MAAS.html).
 
 We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
