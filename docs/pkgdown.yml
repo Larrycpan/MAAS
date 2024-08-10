@@ -1,7 +1,7 @@
 pandoc: 3.1.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
-articles:
+Vignettes:
   1.scATAC-seq data analysis: 1.scATAC-seq data analysis.html
   2.CNV calling: 2.CNV calling.html
   3.SNV calling: 3.SNV calling.html
