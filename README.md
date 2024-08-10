@@ -25,8 +25,8 @@ saveRDS(maas.test, "maas.res.all.rds")
 ```
 # Then we can do clustering based on the consensus latent factors
 #### Determine the optimal clustering strategy
-maas.res <- readRDS("../6.MAAS/maas.res.test.rds")
-barcode.list <- readRDS("../6.MAAS/share.barcode.rds")
+maas.res <- readRDS("maas.res.test.rds")
+barcode.list <- rownames(data$Peak)
 set.seed(1)
 barcode.list <- sample(barcode.list, 400)
 
@@ -65,7 +65,7 @@ ggplot(umap.axis, aes(`UMAP-1`, `UMAP-2`))+
         legend.text = element_text(size = 12))
 ```
 
-Documentation and tutorials (full data preparation and integration) can be found at <https://larrycpan.github.io/MAAS/>. The example data has been uploaded to the folder example.data, which is the input for the [Running MAAS](https://larrycpan.github.io/MAAS/6.MAAS.html). If you would like to go through the whole analysis including data preparation, you can download data from [Zenodo](https://zenodo.org/) (doi: 10.5281/zenodo.10355916).
+Documentation and tutorials (full data preparation and integration) can be found at <https://larrycpan.github.io/MAAS/>. The example data has been uploaded to the folder example.data, which is the input for the [Running MAAS](https://larrycpan.github.io/MAAS/6.MAAS.html).
 
 We provide the source code of SNV calling and MAAS in the github repository, including peak adjusting and multimodal integration.
 To perform SNV RPCA analysis, you should install [Matlab](https://www.mathworks.com/products/matlab.html) in advance, which always finishes in a few seconds. 
