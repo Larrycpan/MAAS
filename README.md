@@ -50,8 +50,10 @@ rownames(df) <- barcode.list
 maas.clu <- data.frame(Cluster = withr::with_seed(2, kmeans(df, centers = 2)$cluster))
 maas.clu$Cluster <- as.factor(maas.clu$Cluster)
 saveRDS(ataclone.clu, "example.MAAS.clu.rds")
+```
 
-#### Visualization
+##### Visualization using UMAP plot
+```
 umap.axis <- withr::with_seed(2, uwot::umap(df, n_neighbors = 50, metric = "manhattan", min_dist = 0.1, n_threads = 30))
 umap.axis <- as.data.frame(umap.axis); umap.axis$Cluster <- ataclone.clu$Cluster
 colnames(umap.axis) <- c("UMAP-1", "UMAP-2", "Cluster")
