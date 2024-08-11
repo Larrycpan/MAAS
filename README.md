@@ -23,8 +23,8 @@ maas.test <- MAAS(data$Peak, df$CNV, df$SNV, dims = 2:5)
 saveRDS(maas.test, "maas.res.all.rds")
 ```
 
+##### Then we can do clustering based on the consensus latent factors
 ```
-# Then we can do clustering based on the consensus latent factors
 #### Determine the optimal clustering strategy
 maas.res <- readRDS("maas.res.test.rds")
 barcode.list <- rownames(data$Peak)
@@ -50,8 +50,10 @@ rownames(df) <- barcode.list
 maas.clu <- data.frame(Cluster = withr::with_seed(2, kmeans(df, centers = 2)$cluster))
 maas.clu$Cluster <- as.factor(maas.clu$Cluster)
 saveRDS(ataclone.clu, "example.MAAS.clu.rds")
+```
 
-#### Visualization
+##### Visualization using UMAP plot
+```
 umap.axis <- withr::with_seed(2, uwot::umap(df, n_neighbors = 50, metric = "manhattan", min_dist = 0.1, n_threads = 30))
 umap.axis <- as.data.frame(umap.axis); umap.axis$Cluster <- ataclone.clu$Cluster
 colnames(umap.axis) <- c("UMAP-1", "UMAP-2", "Cluster")

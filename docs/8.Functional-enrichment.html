@@ -1635,7 +1635,7 @@ library(ComplexHeatmap)
 clusterFile &lt;- &quot;../7.Cluster/example.MAAS.clu.rds&quot;
 gmtFile &lt;- &quot;h.all.v2023.1.Hs.symbols.gmt&quot;
 my_color &lt;- c(&quot;#5050FF&quot;, &quot;#CE3D32&quot;, &quot;#749B58&quot;, &quot;#F0E685&quot;, &quot;#00BFC4&quot;, &quot;#B79F00&quot;, &quot;#00BA38&quot;)</code></pre>
-<pre class="r"><code>#读取表达输入文件,并对输入文件整理
+<pre class="r"><code>#Load gene activity scores
 combined.pro &lt;- readRDS(&quot;../1.Cellanno/scATAC.HCC.pro.annotated.rds&quot;)
 data &lt;- GetAssayData(combined.pro, slot = &quot;data&quot;, assay = &quot;ACTIVITY&quot;)
 cluster &lt;- readRDS(clusterFile)
@@ -1645,11 +1645,11 @@ combined.pro &lt;- subset(combined.pro, cells = rownames(cluster))
 data &lt;- GetAssayData(combined.pro, slot = &quot;data&quot;, assay = &quot;ACTIVITY&quot;)
 data &lt;- data[apply(data, 1, sd) &gt; 0.2,]
 
-#GSVA分析
+#GSVA
 geneSets &lt;- getGmt(gmtFile, geneIdType=SymbolIdentifier())
 gsvaResult &lt;- GSVA::gsva(as.matrix(data), kcdf = &quot;Gaussian&quot;, geneSets, min.sz = 5, verbose = T, parallel.sz = 50)
 
-# #数据合并
+# Combine results
 gsvaResult &lt;- as.data.frame(t(gsvaResult))
 colnames(gsvaResult) &lt;- gsub(&quot;HALLMARK_&quot;, &quot;&quot;, colnames(gsvaResult))
 sameSample &lt;- intersect(row.names(gsvaResult), row.names(cluster))
