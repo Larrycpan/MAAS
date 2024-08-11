@@ -23,8 +23,8 @@ maas.test <- MAAS(data$Peak, df$CNV, df$SNV, dims = 2:5)
 saveRDS(maas.test, "maas.res.all.rds")
 ```
 
+##### Then we can do clustering based on the consensus latent factors
 ```
-# Then we can do clustering based on the consensus latent factors
 #### Determine the optimal clustering strategy
 maas.res <- readRDS("maas.res.test.rds")
 barcode.list <- rownames(data$Peak)
