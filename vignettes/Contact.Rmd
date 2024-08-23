@@ -1,0 +1,13 @@
+---
+title: "Contact"
+output: 
+  html_document:
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{1.1.scATAC-seq data analysis} 
+   %\VignetteEngine{knitr::rmarkdown}
+   %\VignetteEncoding{UTF-8}
+lang: "en-US"
+---
+
+If you have questions about data preparations and MAAS usage, please refer to the the searchable full user's manual, the FAQ section, and the publication. If you think the documentation on this website or in the function annotations is unclear, please submit an issue on Github with the Documentation Request form. If none of these options help, send us an email <kxiongac@connect.ust.hk>. We will do our best to respond to questions that are not otherwise answered in the documentation.

@@ -95,5 +95,5 @@ draw(p, heatmap_legend_side="bottom")
 ```
 
 ```{r, maas.hallmark.png, fig.align = 'center', fig.height = 4, fig.width = 5, out.height = "35%", out.width = "50%", echo=FALSE}
-knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/maas.hallmark.png")
+knitr::include_graphics("https://vip.helloimg.com/i/2024/08/23/66c7f410a0c90.png")
 ```

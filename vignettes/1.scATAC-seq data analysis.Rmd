@@ -160,7 +160,7 @@ print(p)
 ```
 
 ```{r, cell.marker.dotplot.png, fig.align = 'center', fig.height = 3, fig.width = 4, out.height = "50%", out.width = "60%", echo=FALSE}
-knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/cell.marker.dotplot.png")
+knitr::include_graphics("https://vip.helloimg.com/i/2024/08/23/66c7f41bc65b0.png")
 ```
 
 ```{r "Cell label", message=FALSE, warning=FALSE, eval=FALSE}
@@ -179,7 +179,7 @@ FeaturePlot(a, features = list_genes$Tumor)
 ```
 
 ```{r, Tumor.feature.plot.png, fig.align = 'center', fig.height = 3, fig.width = 4, out.height = "50%", out.width = "60%", echo=FALSE}
-knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/Tumor.feature.plot.png")
+knitr::include_graphics("https://vip.helloimg.com/i/2024/08/23/66c7f3f8305ff.png")
 ```
 
 ```{r "umap plot", message=FALSE, warning=FALSE, eval=FALSE}
@@ -198,7 +198,7 @@ DimPlot(object = scATAC.HCC.pro, reduction = 'umap',label = TRUE, group.by = "Ce
 ```
 
 ```{r, cellanno.umap.png, fig.align = 'center', fig.height = 3, fig.width = 5, out.height = "50%", out.width = "60%", echo=FALSE}
-knitr::include_graphics("http://bioinfo.szbl.ac.cn/share/MAAS_data/cellanno.umap.png")
+knitr::include_graphics("https://vip.helloimg.com/i/2024/08/23/66c7f42139259.png")
 ```
 
 ```{r "Cell type export", message=FALSE, warning=FALSE, eval=FALSE}
